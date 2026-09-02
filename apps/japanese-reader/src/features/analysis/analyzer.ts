@@ -1,4 +1,4 @@
-import type { Token, PartOfSpeech } from '../../types';
+import type { Token, PartOfSpeech } from '../../models/text';
 
 // Адаптер частей речи из kuromoji в наши типы
 export function mapPartOfSpeech(pos: string): PartOfSpeech {

@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react';
-import { TokenView } from './components/TokenView';
-import { splitSentences } from './features/analysis/sentenceSplitter';
-import type { Token } from './types';
-import './App.css';
+import { TokenView } from '../components/Token/TokenView';
+import { splitSentences } from '../features/analysis/sentenceSplitter';
+import type { Token } from '../models/text';
+import '../styles/globals.css';
 
 const demoText = '今日は良い天気です。';
 const demoTokens: Token[] = [
