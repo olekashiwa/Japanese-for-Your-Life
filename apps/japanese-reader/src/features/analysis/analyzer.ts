@@ -1,6 +1,5 @@
 import type { Token, PartOfSpeech } from '../../models/text';
 
-// Адаптер частей речи из kuromoji в наши типы
 export function mapPartOfSpeech(pos: string): PartOfSpeech {
   if (pos === '助詞') return 'particle';
   if (pos === '名詞') return 'noun';
@@ -12,10 +11,12 @@ export function mapPartOfSpeech(pos: string): PartOfSpeech {
   return 'other';
 }
 
-// Анализ текста через Web Worker
 export async function analyzeText(text: string): Promise<Token[]> {
+  console.log('🔍 Начинаем анализ текста:', text);
+  
   return new Promise((resolve, reject) => {
-    // Создаём Web Worker
+    console.log('📦 Создаём Worker...');
+    
     const worker = new Worker(
       new URL('./nlp.worker.ts', import.meta.url),
       { type: 'module' }
@@ -23,17 +24,15 @@ export async function analyzeText(text: string): Promise<Token[]> {
     
     const requestId = Date.now().toString();
     
-    console.log('🔧 Отправка текста на анализ в Worker...');
-    
-    // Обработка ответа от Worker
     worker.onmessage = (e) => {
+      console.log('📨 Получено сообщение от Worker:', e.data);
+      
       if (e.data.id === requestId) {
-        worker.terminate(); // Очищаем worker
+        worker.terminate();
         
         if (e.data.success) {
-          console.log('✅ Получен результат от Worker');
+          console.log('✅ Worker вернул результат:', e.data.data);
           
-          // Маппим данные kuromoji в наш формат Token
           const tokens: Token[] = e.data.data.map((t: any, index: number) => ({
             id: `${index}`,
             surface: t.surface_form,
@@ -44,20 +43,23 @@ export async function analyzeText(text: string): Promise<Token[]> {
           
           resolve(tokens);
         } else {
-          console.error('❌ Ошибка в Worker:', e.data.error);
+          console.error('❌ Worker вернул ошибку:', e.data.error);
           reject(new Error(e.data.error));
         }
       }
     };
     
-    // Обработка ошибок Worker
     worker.onerror = (err) => {
+      console.error(' Ошибка Worker:', err);
+      console.error('Тип ошибки:', err.type);
+      console.error('Сообщение:', err.message);
+      console.error('Файл:', err.filename);
+      console.error('Строка:', err.lineno);
       worker.terminate();
-      console.error('❌ Ошибка Worker:', err);
       reject(err);
     };
     
-    // Отправляем текст на анализ
+    console.log('🚀 Отправляем текст в Worker...');
     worker.postMessage({ text, id: requestId });
   });
 }

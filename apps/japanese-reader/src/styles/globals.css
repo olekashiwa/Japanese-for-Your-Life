@@ -29,3 +29,149 @@ rt { color: #65708a; font-size: .43em; font-weight: 500; }
 .token-details { display: grid; gap: 10px; margin: 0; }
 .token-details div { display: grid; grid-template-columns: 120px 1fr; gap: 12px; }
 dt { color: #56627a; } dd { margin: 0; font-weight: 700; }
+
+/* Стили для пар предложений */
+.sentence-pairs {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sentence-list {
+  margin: 0;
+  padding-left: 24px;
+  line-height: 1.8;
+  font-size: 1.25rem;
+}
+
+/* Поле с кнопкой озвучки */
+.field-with-button {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.field-with-button textarea {
+  flex: 1;
+}
+
+.field-with-button .audio-button {
+  flex-shrink: 0;
+  margin-top: 8px;
+}
+
+/* Демо-предложение с переводом */
+.demo-sentence {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.translation-text {
+  color: #64748b;
+  font-style: italic;
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+/* Панель инструментов */
+.toolbar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: #0ea5e9;
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #0284c7;
+}
+
+.btn-secondary {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: #cbd5e1;
+}
+
+.btn-danger {
+  background: #fee2e2;
+  color: #991b1b;
+  padding: 8px 12px;
+}
+
+.btn-danger:hover {
+  background: #fecaca;
+}
+
+/* Список сохранённых текстов */
+.saved-texts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.saved-text-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-radius: 10px;
+  background: #f8fafc;
+  border: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.saved-text-item:hover {
+  background: #eef2f7;
+  border-color: #cbd5e1;
+}
+
+.saved-text-item.active {
+  background: #e0f2fe;
+  border-color: #0ea5e9;
+}
+
+.saved-text-content {
+  flex: 1;
+  cursor: pointer;
+}
+
+.saved-text-japanese {
+  font-size: 1.1rem;
+  margin: 0 0 8px 0;
+  font-weight: 600;
+}
+
+.saved-text-russian {
+  color: #64748b;
+  font-style: italic;
+  margin: 0 0 8px 0;
+}
+
+.saved-text-date {
+  font-size: 0.85rem;
+  color: #94a3b8;
+  margin: 0;
+}

@@ -5,6 +5,8 @@ export type PartOfSpeech =
   | 'particle'
   | 'auxiliary'
   | 'symbol'
+  | 'adverb'
+  | 'pronoun'
   | 'other';
 
 export interface Token {
@@ -13,4 +15,12 @@ export interface Token {
   reading?: string;
   pos: PartOfSpeech;
   isParticle: boolean;
+}
+
+export interface LearningText {
+  id: string;
+  japanese: string;
+  russian: string;
+  createdAt: string;
+  updatedAt: string;
 }

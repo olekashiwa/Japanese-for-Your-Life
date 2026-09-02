@@ -1,0 +1,50 @@
+.sentence-pair {
+  margin: 16px 0;
+  padding: 16px;
+  border-radius: 10px;
+  background: #f8fafc;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sentence-pair:hover {
+  background: #eef2f7;
+  border-color: #cbd5e1;
+}
+
+.sentence-pair.highlighted {
+  background: #e0f2fe;
+  border-color: #0ea5e9;
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+
+.sentence-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sentence-japanese {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.sentence-russian {
+  color: #64748b;
+  font-style: italic;
+  padding-left: 32px;
+}
+
+.sentence-number {
+  font-weight: 700;
+  color: #475569;
+  min-width: 24px;
+}
+
+.sentence-text {
+  font-size: 1.1rem;
+  line-height: 1.6;
+}

@@ -1,0 +1,31 @@
+.audio-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: #e0f2fe;
+  color: #0369a1;
+  cursor: pointer;
+  font-size: 1.1rem;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.audio-button:hover {
+  background: #bae6fd;
+  transform: scale(1.1);
+}
+
+.audio-button.speaking {
+  background: #fca5a5;
+  color: #991b1b;
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
