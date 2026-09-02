@@ -1,4 +1,9 @@
 import type { Token, PartOfSpeech } from '../../models/text';
+// @ts-ignore
+import * as kuromoji from 'kuromoji';
+
+let tokenizer: any = null;
+let isInitializing = false;
 
 export function mapPartOfSpeech(pos: string): PartOfSpeech {
   if (pos === '助詞') return 'particle';
@@ -11,55 +16,49 @@ export function mapPartOfSpeech(pos: string): PartOfSpeech {
   return 'other';
 }
 
-export async function analyzeText(text: string): Promise<Token[]> {
-  console.log('🔍 Начинаем анализ текста:', text);
+const initTokenizer = (): Promise<any> => {
+  if (tokenizer) {
+    return Promise.resolve(tokenizer);
+  }
+  
+  if (isInitializing) {
+    return new Promise((resolve) => {
+      const interval = setInterval(() => {
+        if (tokenizer) {
+          clearInterval(interval);
+          resolve(tokenizer);
+        }
+      }, 100);
+    });
+  }
+
+  isInitializing = true;
   
   return new Promise((resolve, reject) => {
-    console.log('📦 Создаём Worker...');
-    
-    const worker = new Worker(
-      new URL('./nlp.worker.ts', import.meta.url),
-      { type: 'module' }
-    );
-    
-    const requestId = Date.now().toString();
-    
-    worker.onmessage = (e) => {
-      console.log('📨 Получено сообщение от Worker:', e.data);
-      
-      if (e.data.id === requestId) {
-        worker.terminate();
-        
-        if (e.data.success) {
-          console.log('✅ Worker вернул результат:', e.data.data);
-          
-          const tokens: Token[] = e.data.data.map((t: any, index: number) => ({
-            id: `${index}`,
-            surface: t.surface_form,
-            reading: t.reading || undefined,
-            pos: mapPartOfSpeech(t.pos),
-            isParticle: t.pos === '助詞',
-          }));
-          
-          resolve(tokens);
-        } else {
-          console.error('❌ Worker вернул ошибку:', e.data.error);
-          reject(new Error(e.data.error));
-        }
+    kuromoji.builder({ dicPath: '/dict' }).build((err: any, _tokenizer: any) => {
+      if (err) {
+        console.error('Kuromoji error:', err);
+        isInitializing = false;
+        reject(err);
+      } else {
+        console.log('✅ Kuromoji initialized!');
+        tokenizer = _tokenizer;
+        isInitializing = false;
+        resolve(_tokenizer);
       }
-    };
-    
-    worker.onerror = (err) => {
-      console.error(' Ошибка Worker:', err);
-      console.error('Тип ошибки:', err.type);
-      console.error('Сообщение:', err.message);
-      console.error('Файл:', err.filename);
-      console.error('Строка:', err.lineno);
-      worker.terminate();
-      reject(err);
-    };
-    
-    console.log('🚀 Отправляем текст в Worker...');
-    worker.postMessage({ text, id: requestId });
+    });
   });
+};
+
+export async function analyzeText(text: string): Promise<Token[]> {
+  const tok = await initTokenizer();
+  const result = tok.tokenize(text);
+  
+  return result.map((t: any, index: number) => ({
+    id: `${index}`,
+    surface: t.surface_form,
+    reading: t.reading || undefined,
+    pos: mapPartOfSpeech(t.pos),
+    isParticle: t.pos === '助詞',
+  }));
 }

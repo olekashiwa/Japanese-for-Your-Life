@@ -17,7 +17,4 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['kuromoji'],
   },
-  worker: {
-    format: 'es',
-  },
 });
