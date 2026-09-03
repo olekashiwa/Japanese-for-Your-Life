@@ -1,7 +1,10 @@
 import type { TextToken } from "../../models/text";
 import { tokenizeText as fallback } from "./simpleTokenizer";
 
-const API_URL = "http://localhost:3000/analyze";
+const API_URLS = [
+  "http://localhost:3000/analyze",
+  "https://japanese-reader-api.onrender.com/analyze"
+];
 
 function mapPos(p: string) {
   const m: Record<string, string> = {
@@ -51,7 +54,10 @@ function merge(tokens: any[]) {
 
 export async function analyzeText(text: string): Promise<TextToken[]> {
   try {
-    const res = await fetch(API_URL, {
+    let res: Response | null = null;
+    for (const url of API_URLS) {
+      try {
+        res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ text })
