@@ -1,10 +1,10 @@
-import type { Token } from '../../models/text';
+import type { TextToken } from '../../models/text';
 
 interface TokenViewProps {
-  token: Token;
+  token: TextToken;
   showFurigana?: boolean;
   isHidden?: boolean;
-  onClick?: (token: Token) => void;
+  onClick?: (token: TextToken) => void;
 }
 
 export function TokenView({

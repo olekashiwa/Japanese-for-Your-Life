@@ -1,8 +1,8 @@
 declare module 'kuromoji' {
   interface Tokenizer {
-    tokenize(text: string): Token[];
+    tokenize(text: string): TextToken[];
   }
-  interface Token {
+  interface TextToken {
     surface_form: string;
     pos: string;
     pos_detail_1: string;

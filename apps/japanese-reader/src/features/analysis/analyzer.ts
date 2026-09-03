@@ -1,64 +1,68 @@
-import type { Token, PartOfSpeech } from '../../models/text';
-// @ts-ignore
-import * as kuromoji from 'kuromoji';
+import type { TextToken } from "../../models/text";
+import { tokenizeText as fallback } from "./simpleTokenizer";
 
-let tokenizer: any = null;
-let isInitializing = false;
+const API_URL = "http://localhost:3000/analyze";
 
-export function mapPartOfSpeech(pos: string): PartOfSpeech {
-  if (pos === '助詞') return 'particle';
-  if (pos === '名詞') return 'noun';
-  if (pos === '動詞') return 'verb';
-  if (pos === '形容詞') return 'adjective';
-  if (pos === '助動詞') return 'auxiliary';
-  if (pos === '副詞') return 'adverb';
-  if (pos === '代名詞') return 'pronoun';
-  return 'other';
+function mapPos(p: string) {
+  const m: Record<string, string> = {
+    particle: "particle", noun: "noun", verb: "verb",
+    auxiliary: "auxiliary", adjective: "adjective",
+    adverb: "adverb", symbol: "symbol"
+  };
+  return m[p] || "other";
 }
 
-const initTokenizer = (): Promise<any> => {
-  if (tokenizer) {
-    return Promise.resolve(tokenizer);
-  }
-  
-  if (isInitializing) {
-    return new Promise((resolve) => {
-      const interval = setInterval(() => {
-        if (tokenizer) {
-          clearInterval(interval);
-          resolve(tokenizer);
-        }
-      }, 100);
-    });
-  }
+function isVerbPos(p: string) {
+  return p === "verb" || p === "auxiliary";
+}
 
-  isInitializing = true;
-  
-  return new Promise((resolve, reject) => {
-    kuromoji.builder({ dicPath: '/dict' }).build((err: any, _tokenizer: any) => {
-      if (err) {
-        console.error('Kuromoji error:', err);
-        isInitializing = false;
-        reject(err);
-      } else {
-        console.log('✅ Kuromoji initialized!');
-        tokenizer = _tokenizer;
-        isInitializing = false;
-        resolve(_tokenizer);
+function merge(tokens: any[]) {
+  const aux = ["て","で","た","だ","ます","ません","ました","ない","なかった","う","よう","いけ","ませ","ん","ては","では","たり","だり","ても","でも","てい","でい","ちゃ","でちゃ","とも","ば","たら","なら"];
+  const r: any[] = [];
+  for (let i = 0; i < tokens.length; i++) {
+    const c: any = Object.assign({}, tokens[i]);
+    let mergedTe = false;
+    if (isVerbPos(c.pos)) {
+      while (i + 1 < tokens.length) {
+        const n = tokens[i + 1];
+        if (aux.includes(n.surface)) {
+          c.surface += n.surface;
+          c.reading = (c.reading || "") + (n.reading || "");
+          if (n.surface === "て" || n.surface === "で" || n.surface === "ては" || n.surface === "では") mergedTe = true;
+          i++;
+        } else if (mergedTe && isVerbPos(n.pos)) {
+          c.surface += n.surface;
+          c.reading = (c.reading || "") + (n.reading || "");
+          i++;
+        } else break;
       }
+    }
+    const mappedPos = isVerbPos(c.pos) ? "verb" : mapPos(c.pos);
+    r.push({
+      id: String(r.length),
+      surface: c.surface,
+      reading: c.reading || undefined,
+      pos: mappedPos,
+      isParticle: mappedPos === "particle"
     });
-  });
-};
+  }
+  return r;
+}
 
-export async function analyzeText(text: string): Promise<Token[]> {
-  const tok = await initTokenizer();
-  const result = tok.tokenize(text);
-  
-  return result.map((t: any, index: number) => ({
-    id: `${index}`,
-    surface: t.surface_form,
-    reading: t.reading || undefined,
-    pos: mapPartOfSpeech(t.pos),
-    isParticle: t.pos === '助詞',
-  }));
+export async function analyzeText(text: string): Promise<TextToken[]> {
+  try {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text })
+    });
+    if (!res.ok) throw new Error("api " + res.status);
+    const raw = await res.json();
+    const result = merge(raw);
+    console.log("tokens:", result.length, result.map(t => t.surface));
+    return result;
+  } catch (e) {
+    console.warn("[analyzer] fallback tokenizer", e);
+    return fallback(text);
+  }
 }

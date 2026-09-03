@@ -1,10 +1,10 @@
 import { useMemo, useState, useEffect } from 'react';
-import { TokenView } from '../components/Token/TokenView';
+import { TokenView } from '../components/TextToken/TokenView';
 import { AudioButton } from '../components/AudioButton/AudioButton';
 import { splitSentences } from '../features/analysis/sentenceSplitter';
-import { tokenizeText } from '../features/analysis/simpleTokenizer';
+import { analyzeText } from '../features/analysis/analyzer';
 import { saveText, loadAllTexts, deleteText, createNewText } from '../features/storage/database';
-import type { Token, LearningText } from '../models/text';
+import type { TextToken, LearningText } from '../models/text';
 import '../styles/globals.css';
 
 const demoText = '今日は良い天気です。';
@@ -13,7 +13,7 @@ const demoTranslation = 'Сегодня хорошая погода.';
 export default function App() {
   const [text, setText] = useState(demoText);
   const [translation, setTranslation] = useState(demoTranslation);
-  const [selectedToken, setSelectedToken] = useState<Token | null>(null);
+  const [selectedToken, setSelectedToken] = useState<TextToken | null>(null);
   const [savedTexts, setSavedTexts] = useState<LearningText[]>([]);
   const [currentTextId, setCurrentTextId] = useState<string | null>(null);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
@@ -21,8 +21,17 @@ export default function App() {
   const sentences = useMemo(() => splitSentences(text), [text]);
   const translations = useMemo(() => splitSentences(translation), [translation]);
   
-  const tokenizedSentences = useMemo(() => {
-    return sentences.map(sentence => tokenizeText(sentence));
+  const [tokenizedSentences, setTokenizedSentences] = useState<TextToken[][]>([]);
+  
+  useEffect(() => {
+    if (sentences.length === 0) return;
+    
+    const tokenizeAll = async () => {
+      const results = await Promise.all(sentences.map(sentence => analyzeText(sentence)));
+      setTokenizedSentences(results);
+    };
+    
+    tokenizeAll();
   }, [sentences]);
 
   useEffect(() => {
@@ -90,14 +99,14 @@ export default function App() {
       </label>
       <section className="panel">
         <h2>Предложения</h2>
-        {sentences.length === 0 ? <p className="muted">Введите текст</p> : (
+        {sentences.length === 0 ? <p className="muted">Введите текст</p> : tokenizedSentences.length === 0 ? <p className="muted">🔄 Анализируем...</p> : (
           <div className="sentence-pairs">
             {sentences.map((sentence, i) => (
               <div key={i} className="sentence-pair">
                 <div className="sentence-japanese">
                   <span className="sentence-number">{i + 1}.</span>
                   <span className="japanese-text">
-                    {tokenizedSentences[i].map((token) => (
+                    {(tokenizedSentences[i] || []).map((token: TextToken) => (
                       <TokenView key={token.id} token={token} onClick={setSelectedToken} />
                     ))}
                   </span>

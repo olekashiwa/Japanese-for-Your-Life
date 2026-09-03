@@ -1,4 +1,3 @@
-import React from 'react';
 import { AudioButton } from '../AudioButton/AudioButton';
 import './SentencePair.css';
 

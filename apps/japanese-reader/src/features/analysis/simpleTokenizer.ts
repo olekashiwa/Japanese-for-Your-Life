@@ -1,4 +1,4 @@
-import type { Token, PartOfSpeech } from '../../models/text';
+import type { TextToken, PartOfSpeech } from '../../models/text';
 // @ts-ignore
 import TinySegmenter from 'tiny-segmenter';
 
@@ -17,7 +17,7 @@ function guessPartOfSpeech(token: string): PartOfSpeech {
   return 'other';
 }
 
-export function tokenizeText(text: string): Token[] {
+export function tokenizeText(text: string): TextToken[] {
   const segments = segmenter.segment(text);
   
   return segments.map((segment: string, index: number) => ({

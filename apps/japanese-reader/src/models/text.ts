@@ -1,15 +1,15 @@
-export type PartOfSpeech =
-  | 'noun'
-  | 'verb'
-  | 'adjective'
-  | 'particle'
-  | 'auxiliary'
-  | 'symbol'
-  | 'adverb'
-  | 'pronoun'
+export type PartOfSpeech = 
+  | 'noun' 
+  | 'verb' 
+  | 'adjective' 
+  | 'particle' 
+  | 'auxiliary' 
+  | 'symbol' 
+  | 'adverb' 
+  | 'pronoun' 
   | 'other';
 
-export interface Token {
+export interface TextToken {
   id: string;
   surface: string;
   reading?: string;
